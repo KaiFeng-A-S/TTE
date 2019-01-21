@@ -3,16 +3,17 @@ from multiprocessing import Pool
 import utils
 import pandas as pd
 import os
+import argparse
 
 def truncate(trajectory, threshold = 25, num = 1, unit = 'm'):
-    trans = utils.lat_long2meter()
+    trans = utils.lat_long2meter
     past = trajectory[0]
     count = 0
     tmp = [0]
     trajectories = []
     for i, coord in enumerate(trajectory[1: ]):
         j = i + 1
-        distance = trans(past, coord)
+        distance = trans(past, coord, unit = unit)
         if distance > threshold:
             past = coord
             count = 0
@@ -157,4 +158,14 @@ def raw2trajectories(input_dir,
     pool.join()
 
 if __name__ == '__main__':
-    pass
+    parser = argparse.ArgumentParser()
+    parser.add_argument('input_file', required = True)
+    parser.add_argument('output_file', required = True)
+    args = parser.parse_args()
+
+    raw2trajectories(args.input_file,
+                    '^\d+',
+                    '\.csv$',
+                    args.output_file,
+                    utils.legal_coord,
+                    division_1e5)
